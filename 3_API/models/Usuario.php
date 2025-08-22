@@ -42,7 +42,21 @@ class Usuario
         $stmt = $this->db->prepare($query);
 
         $stmt->bind_param('ssss', $data['nombre'], $data['apellido'], $data['email'], $data['pass']);
-        $stmt->execute();
+
+        try
+        {
+            $stmt->execute();
+            return true;
+        }
+        catch (mysqli_sql_exception $e)
+        {
+            if ($e->getCode() == 1062)
+            {
+                return "emailExiste";
+            }
+
+            throw $e;
+        }
 
         if ($stmt->error) {
             return ['message' => 'Error en la ejecución de la consulta'];

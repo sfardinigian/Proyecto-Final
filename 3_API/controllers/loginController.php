@@ -1,30 +1,34 @@
 <?php
 require_once __DIR__ . '/../models/Usuario.php';
 
+// Se consulta iniciar la sesión
 session_start();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login']))
 {
-    $email = $_POST['email'];
-    $pass  = $_POST['pass'];
+    $email = trim($_POST['email']);
+    $pass  = trim($_POST['pass']);
 
     $usuario = new Usuario();
-
     $data = $usuario->getByEmail($email);
 
-    if ($data)
+    // Verificamos si se encontró el usuario
+    if (!$data)
     {
-        if (password_verify($pass, $data['pass']))
-        {
-            $_SESSION['usuario'] = ['id_usuario' => $data['id_usuario'], 'nombre' => $data['nombre'], 'apellido' => $data['apellido'], 'email' => $data['email']];
-
-            header('Location: ../views/main.php');
-            exit;
-        }
-        else
-        {
-            header('Location: ../views/inicio.php?error=login');
-            exit;
-        }
+        header('Location: ../views/inicio.php?error=email');
+        exit;
     }
+
+    // Verificamos si la contraseña es correcta
+    if (!password_verify($pass, $data['pass']))
+    {
+        header('Location: ../views/inicio.php?error=pass');
+        exit;
+    }
+
+    $_SESSION['usuario'] = ['id_usuario' => $data['id_usuario'], 'nombre' => $data['nombre'], 'apellido' => $data['apellido'], 'email' => $data['email']];
+
+    header('Location: ../views/main.php');
+    exit;
 }
+?>

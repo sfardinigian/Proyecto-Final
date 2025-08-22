@@ -26,7 +26,7 @@ $usuario = $controller->obtenerUsuario();
 
 <body>
     <h1>Hola <?php echo htmlspecialchars($usuarioSesion['nombre']); ?> 👋</h1>
-    <p>Bienvenido/a a "Tiempo ganado"</p>
+    <p>Bienvenido/a a "Cronos"</p>
 
     <a href="../controllers/logoutController.php">Cerrar sesión</a>
 
