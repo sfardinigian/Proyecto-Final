@@ -1,29 +1,10 @@
 <?php
 session_start();
 
-// Si está la sesión activa, redirigir al main
-if (isset($_SESSION['usuario']))
+if (!isset($_SESSION['usuario']))
 {
-    header('Location: views/main.php');
+    header('Location: inicio.php?error=sesion');
     exit;
-}
-
-// Si están las cookies activas, redirigir al main
-if (!isset($_SESSION['usuario']) && isset($_COOKIE['usuario_id'], $_COOKIE['usuario_email']))
-{
-    require_once 'models/Usuario.php';
-
-    $usuarioModel = new Usuario();
-    $userData = $usuarioModel->getById($_COOKIE['usuario_id']);
-
-    if ($userData && $userData['email'] === $_COOKIE['usuario_email'])
-    {
-        $_SESSION['usuario'] = ['id_usuario' => $userData['id_usuario'], 'nombre' => $userData['nombre'], 'apellido' => $userData['apellido'], 'email' => $userData['email']];
-
-        // Redirigir porque ya está logueado
-        header('Location: views/main.php');
-        exit;
-    }
 }
 ?>
 
@@ -41,17 +22,17 @@ if (!isset($_SESSION['usuario']) && isset($_COOKIE['usuario_id'], $_COOKIE['usua
         }
     </script>
 
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="../css/style.css">
 
-    <link rel="icon" href="img/logo_mini.png" type="image/x-icon">
+    <link rel="icon" href="../img/logo_mini.png" type="image/x-icon">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap" rel="stylesheet">
 
-    <script src="js/script.js" defer></script>
+    <script src="../js/script.js" defer></script>
 
-    <title>Registrarse</title>
+    <title>Iniciar sesión</title>
 </head>
 
 <body>
@@ -59,10 +40,10 @@ if (!isset($_SESSION['usuario']) && isset($_COOKIE['usuario_id'], $_COOKIE['usua
         <span id="iconoSol" class="modoIcono">☀︎</span>
         <span id="iconoLuna" class="modoIcono">🌙︎</span>
     </div>
-
+    
     <div class="contBody">
         <div class="contRegIn">
-            <h1>Bienvenido</h1>
+            <h1>Modificación</h1>
 
             <?php if (isset($_GET['error'])): ?>
                 <div style="color:red;">
@@ -75,17 +56,17 @@ if (!isset($_SESSION['usuario']) && isset($_COOKIE['usuario_id'], $_COOKIE['usua
                         case 'apellido':
                             echo "El apellido sólo debe tener letras.<br><br>";
                             break;
-                        case 'email':
-                            echo "El correo electrónico no es válido.<br><br>";
-                            break;
                         case 'pass':
                             echo "La contraseña debe tener al menos 8 caracteres, incluir letras y números.<br><br>";
                             break;
                         case 'passNoCoincide':
                             echo "Las contraseñas no coinciden.<br><br>";
                             break;
-                        case 'emailExiste':
-                            echo "El correo electrónico ya está registrado.<br><br>";
+                        case 'faltaAnterior':
+                            echo "Ingrese su contraseña anterior.<br><br>";
+                            break;
+                        case 'passAnterior':
+                            echo "La contraseña anterior no coincide.<br><br>";
                             break;
                         case 'desconocido':
                             echo "Ha ocurrido un error desconocido.<br><br>";
@@ -95,23 +76,29 @@ if (!isset($_SESSION['usuario']) && isset($_COOKIE['usuario_id'], $_COOKIE['usua
                 </div>
             <?php endif; ?>
 
-            <form action="controllers/usuarioController.php" method="post">
+            <form action="../controllers/modifController.php" method="post">
                 <input type="text" name="nombre" placeholder=" Nombre" required><br>
                 <input type="text" name="apellido" placeholder=" Apellido" required><br>
-                <input type="email" name="email" placeholder=" Correo electrónico" required><br>
 
                 <br>
 
-                <input type="password" name="pass" placeholder=" Contraseña" required><br>
-                <input type="password" name="pass2" placeholder=" Repita la contraseña" required><br>
+                <input type="password" name="passAnterior" placeholder=" Contraseña anterior" required><br>
 
                 <br>
 
-                <input type="submit" value="Registrarse" name="registrar" id="boton">
+                <input type="password" name="passNueva" placeholder=" Contraseña nueva (opcional)"><br>
+                <input type="password" name="passNueva2" placeholder=" Repita la contraseña"><br>
 
-                <p>¿Ya tienes una cuenta?</p>
-                
-                <a href="views/inicio.php">Iniciar sesión</a>
+                <input type="hidden" name="id_usuario" value="<?php echo $_SESSION['usuario']['id_usuario']; ?>">
+
+                <br>
+
+                <input type="submit" value="Modificar" name="modificar">
+
+                <br>
+                <br>
+
+                <a href="main.php">Volver</a>
             </form>
         </div>
     </div>

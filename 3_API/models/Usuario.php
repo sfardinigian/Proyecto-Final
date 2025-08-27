@@ -11,8 +11,9 @@ class Usuario
         $this->db = $connection->connect();
     }
 
-    // READ - Obtener todos los usuarios
+    // ------------------------------ CRUD Default ------------------------------
 
+    // READ - Obtener todos los usuarios
     public function get()
     {
         $query = "SELECT * FROM usuarios";
@@ -35,7 +36,6 @@ class Usuario
     }
 
     // CREATE - Agregar nuevo usuario
-
     public function create($data)
     {
         $query = "INSERT INTO usuarios (nombre, apellido, email, pass) VALUES (?, ?, ?, ?)";
@@ -58,31 +58,31 @@ class Usuario
             throw $e;
         }
 
-        if ($stmt->error) {
-            return ['message' => 'Error en la ejecución de la consulta'];
+        if ($stmt->error)
+        {
+            return ['message' => 'Error en la ejecución de la consulta.'];
         }
 
         return ['message' => '¡Usuario registrado con éxito!'];
     }
 
     // UPDATE - Editar usuario
-
     public function update($id, $data)
     {
-        $query = "UPDATE usuarios SET nombre=?, apellido=?, email=?, pass=? WHERE id_usuario=?";
+        $query = "UPDATE usuarios SET nombre=?, apellido=?, pass=? WHERE id_usuario=?";
         $stmt = $this->db->prepare($query);
-        $stmt->bind_param('ssss', $data['nombre'], $data['apellido'], $data['email'], $data['pass'], $id);
-        $stmt->execute();
+        $stmt->bind_param('sssi', $data['nombre'], $data['apellido'], $data['pass'], $id);
 
-        if ($stmt->error) {
-            return ['message' => 'Error en la actualización'];
+        if (!$stmt->execute())
+        {
+            error_log("Error en update: " . $stmt->error);
+            return false;
         }
-
-        return ['message' => '¡Datos modificados con éxito!'];
+        
+        return true;
     }
 
     // DELETE - Eliminar usuario
-
     public function delete($id)
     {
         $query = "DELETE FROM usuarios WHERE id_usuario=?";
@@ -97,8 +97,21 @@ class Usuario
         return ['message' => '¡Usuario eliminado con éxito!'];
     }
 
-    // Iniciar sesión por e-mail
+    // ------------------------------ Consultas independientes del proyecto ------------------------------
 
+    // MODIFICACIÓN: Obtener usuario por ID
+    public function getById($id)
+    {
+        $query = "SELECT * FROM usuarios WHERE id_usuario = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+
+        $res = $stmt->get_result();
+        return $res->fetch_assoc();
+    }
+
+    // INICIAR SESIÓN - Iniciar sesión por e-mail
     public function getByEmail($email)
     {
         $query = "SELECT * FROM usuarios WHERE email = ?";
